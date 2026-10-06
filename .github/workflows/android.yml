@@ -74,5 +74,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: boson-debug-apk
-          path: usbCameraTest3/build/outputs/apk/debug/*.apk
-          if-no-files-found: ignore
+          path: usbCameraTest3/build/outputs/apk/**/*.apk
+          if-no-files-found: error
