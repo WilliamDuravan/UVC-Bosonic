@@ -34,11 +34,13 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Install Gradle 3.3 directly (bypassing the broken wrapper jar)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '3.3'
 
       - name: Build Boson module APK
-        run: ./gradlew :usbCameraTest3:assembleDebug --stacktrace
+        run: gradle :usbCameraTest3:assembleDebug --stacktrace
 
       - name: Upload APK
         if: always()
