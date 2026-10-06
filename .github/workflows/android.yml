@@ -18,10 +18,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Accept SDK licenses and install platform/build-tools/NDK
+      - name: Accept SDK licenses and install platform/build-tools
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-28" "build-tools;28.0.3" "ndk;21.4.7075529"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-28" "build-tools;28.0.3"
 
       - name: Strip unsupported <base-extension> metadata (old AGP can't parse schema v3)
         run: |
@@ -39,10 +39,16 @@ jobs:
                   print(f"Patched {path}")
           EOF
 
+      - name: Download legacy NDK r16b (last version with MIPS/MIPS64 toolchains)
+        run: |
+          wget -q https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
+          unzip -q android-ndk-r16b-linux-x86_64.zip -d "$HOME"
+          echo "NDK_DIR=$HOME/android-ndk-r16b" >> "$GITHUB_ENV"
+
       - name: Write local.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          echo "ndk.dir=$ANDROID_HOME/ndk/21.4.7075529" >> local.properties
+          echo "ndk.dir=$NDK_DIR" >> local.properties
 
       - name: Switch to JDK 8 (for the actual Gradle build)
         uses: actions/setup-java@v4
