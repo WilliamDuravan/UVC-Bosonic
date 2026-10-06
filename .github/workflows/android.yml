@@ -23,6 +23,22 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-28" "build-tools;28.0.3" "ndk;21.4.7075529"
 
+      - name: Strip unsupported <base-extension> metadata (old AGP can't parse schema v3)
+        run: |
+          python3 - <<'EOF'
+          import re, glob, os
+          sdk = os.environ['ANDROID_HOME']
+          pattern = re.compile(r'<[\w:.-]*base-extension\b.*?</[\w:.-]*base-extension>', re.DOTALL)
+          for path in glob.glob(os.path.join(sdk, '**', 'package.xml'), recursive=True):
+              with open(path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              new_content = pattern.sub('', content)
+              if new_content != content:
+                  with open(path, 'w', encoding='utf-8') as f:
+                      f.write(new_content)
+                  print(f"Patched {path}")
+          EOF
+
       - name: Write local.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
